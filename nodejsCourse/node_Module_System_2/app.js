@@ -16,11 +16,12 @@ const LogEvent = require('./events_module');
 
 //console.log(filesSystem.filesAs);
 
-const loggerEvent = new LogEvent();
+/*const loggerEvent = new LogEvent();*/
 // exercise 2
 // register a listener
+/*
 loggerEvent.on('logging', (args) => {
     console.log('Logging called', args);
 });
 
-loggerEvent.log('reza');
+loggerEvent.log('reza');*/
