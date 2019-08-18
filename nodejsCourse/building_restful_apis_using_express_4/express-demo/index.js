@@ -50,6 +50,17 @@ app.post('/api/courses', (req, res) => {
     res.send(course);
 });
 
+//PUT METHODE
+app.put('api/courses/:id', (req, res) => {
+//    TODO: look up the course
+//          if not existing, return 404
+//          validate
+//          if invalid, return 400 - bad request
+//          update course
+//          return the updated course to client
+
+});
+
 // ------------------------------------------------------------------------
 app.get('/api/posts/:year/:month', (req, res) => {
     // params request
