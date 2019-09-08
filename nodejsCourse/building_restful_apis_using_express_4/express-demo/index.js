@@ -20,6 +20,7 @@ app.get('/api/courses', (req, res) => {
     res.send(courses);
 });
 
+// GET METHODE GET COURSE
 app.get('/api/courses/:id', (req, res) => {
    let course = courses.find(number => number.id === parseInt(req.params.id));
    if(!course) {
@@ -28,7 +29,7 @@ app.get('/api/courses/:id', (req, res) => {
    res.send(course);
 });
 
-// POST METHODE
+// POST METHODE CREATE course
 app.post('/api/courses', (req, res) => {
 
     const {error} = validateCourse(req.body); // result.error
@@ -44,10 +45,11 @@ app.post('/api/courses', (req, res) => {
     res.send(course);
 });
 
-//PUT METHODE
+//PUT METHODE UPDATING  couurs
 app.put('/api/courses/:id', (req, res) => {
 
     let course = courses.find(number => number.id === parseInt(req.params.id));
+
     if(!course) {
         return res.status(404).send('The course with given ID was not found');
     }
@@ -62,11 +64,27 @@ app.put('/api/courses/:id', (req, res) => {
     res.send(course);
 });
 
+//  DELETE METHODE DELETE COURSE
 app.delete('/api/courses/:id', (req,res) => {
-    //  TODO Look up the course
-    //      if not existing, return 404
-    //      delete
-    //      return the same course
+
+    // look up the course
+    let course = courses.find(number => number.id === parseInt(req.params.id));
+    // if not  existing, return 404
+    if(!course ) {
+        return res.status(404).send('The course witn given ID was not found');
+    }
+
+    //delete course
+    /*for( let i = 0; i < courses.length; i++){
+        if ( courses[i] === course) {
+            courses.splice(i, 1);
+        }
+    }*/
+    //OR
+    let index = courses.indexOf(course);
+    courses.splice(index, 1);
+
+    res.send(course);
 });
 
 function validateCourse(course) {
