@@ -1,16 +1,37 @@
+const startupDebuger = require('debug')('app:startup');
+const dbDebuger = require('debug')('app:db');
+const config = require('config');
+const morgan = require('morgan');
+const helmet = require('helmet');
 const Joi = require('joi');
 const logger =require('./logger');
 const authetincation = require('./authentication');
 const express = require('express');
 const app = express();
 
+
 // adding a middleware
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static('public'));
+app.use(helmet());
 
+// configuration
+startupDebuger(`Applcitation name: ${config.get('name')}`);
+startupDebuger(`Mail server: ${config.get('mail.host')}`);
+startupDebuger(`Mail password: ${config.get('mail.password')}`);
+// enviroment variable
+startupDebuger(`NODE_ENV: ${process.env.NODE_ENV}`);
+startupDebuger(`app: ${app.get('env')}`);
+
+if(app.get('env') === 'development') {
+    app.use(morgan('tiny'));
+    startupDebuger('mogan is enabled');
+}
+
+// database work console.log
+dbDebuger('connected with database');
 app.use(logger);
-
 app.use(authetincation);
 
 const courses = [
@@ -114,3 +135,5 @@ app.get('/api/posts/:year/:month', (req, res) => {
 // PORT
 const port = process.env.PORT || 3002;
 app.listen(port, () => console.log(`listening on poort ${port}...`));
+
+//todo 9-configuration
