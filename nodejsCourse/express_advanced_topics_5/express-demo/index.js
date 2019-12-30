@@ -3,12 +3,16 @@ const dbDebuger = require('debug')('app:db');
 const config = require('config');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const Joi = require('joi');
-const logger =require('./logger');
-const authetincation = require('./authentication');
+const logger =require('./middleware/logger');
+const courses = require('./routes/courses');
+const home = require('./routes/home');
+const authetincation = require('./middleware/authentication');
 const express = require('express');
 const app = express();
 
+// templating engine
+app.set('view engine', 'pug');
+app.set('views', './views'); // optionals becouse this is a default element
 
 // adding a middleware
 app.use(express.json());
@@ -19,111 +23,28 @@ app.use(helmet());
 // configuration
 startupDebuger(`Applcitation name: ${config.get('name')}`);
 startupDebuger(`Mail server: ${config.get('mail.host')}`);
-startupDebuger(`Mail password: ${config.get('mail.password')}`);
+startupDebuger(`Mail password: ${config.get('mail.password')}`); // set app_password=1234 for custom-enviroment-variables.json
+
 // enviroment variable
 startupDebuger(`NODE_ENV: ${process.env.NODE_ENV}`);
 startupDebuger(`app: ${app.get('env')}`);
 
 if(app.get('env') === 'development') {
     app.use(morgan('tiny'));
-    startupDebuger('mogan is enabled');
+    startupDebuger('morgan is enabled s');
 }
 
 // database work console.log
 dbDebuger('connected with database');
+
+// custom middleware
 app.use(logger);
 app.use(authetincation);
 
-const courses = [
-    {id:1, name: 'course1'},
-    {id:2, name: 'course2'},
-    {id:3, name: 'course3'},
-    {id:4, name: 'course4'}
-];
-
 // GET METHODE
-app.get('/', (req, res) => {
-    res.send('Hello Reza!!');
-});
+app.use('/', home);
+app.use('/api/courses', courses);
 
-app.get('/api/courses', (req, res) => {
-    res.send(courses);
-});
-
-// GET METHODE GET COURSE
-app.get('/api/courses/:id', (req, res) => {
-   let course = courses.find(number => number.id === parseInt(req.params.id));
-   if(!course) {
-       return res.status(404).send('The course with given ID was not found');
-   }
-   res.send(course);
-});
-
-// POST METHODE CREATE course
-app.post('/api/courses', (req, res) => {
-
-    const {error} = validateCourse(req.body); // result.error
-    if (error) {
-        return res.status(400).send(error.details[0].message);
-    }
-
-    const course = {
-        id: courses.length + 1,
-        name: req.body.name
-    };
-    courses.push(course);
-    res.send(course);
-});
-
-//PUT METHODE UPDATING  couurs
-app.put('/api/courses/:id', (req, res) => {
-
-    let course = courses.find(number => number.id === parseInt(req.params.id));
-
-    if(!course) {
-        return res.status(404).send('The course with given ID was not found');
-    }
-
-    const {error} = validateCourse(req.body);
-
-    if (error) {
-        return res.status(400).send(error.details[0].message);
-    }
-
-    course.name = req.body.name;
-    res.send(course);
-});
-
-//  DELETE METHODE DELETE COURSE
-app.delete('/api/courses/:id', (req,res) => {
-
-    // look up the course
-    let course = courses.find(number => number.id === parseInt(req.params.id));
-    // if not  existing, return 404
-    if(!course ) {
-        return res.status(404).send('The course witn given ID was not found');
-    }
-
-    //delete course
-    /*for( let i = 0; i < courses.length; i++){
-        if ( courses[i] === course) {
-            courses.splice(i, 1);
-        }
-    }*/
-    //OR
-    let index = courses.indexOf(course);
-    courses.splice(index, 1);
-
-    res.send(course);
-});
-
-function validateCourse(course) {
-    const schema = {
-        name: Joi.string().min(3).required()
-    };
-
-    return Joi.validate(course, schema);
-}
 // ------------------------------------------------------------------------
 app.get('/api/posts/:year/:month', (req, res) => {
     // params request
@@ -131,9 +52,8 @@ app.get('/api/posts/:year/:month', (req, res) => {
     // query request
     res.send(req.query);
 });
+// ------------------------------------------------------------------------
 
 // PORT
 const port = process.env.PORT || 3002;
 app.listen(port, () => console.log(`listening on poort ${port}...`));
-
-//todo 9-configuration
